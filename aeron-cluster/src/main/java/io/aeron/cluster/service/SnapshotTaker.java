@@ -76,67 +76,37 @@ public class SnapshotTaker
 
     /**
      * Mark the beginning of the encoded snapshot.
+    /**
+     * Mark the beginning of the encoded snapshot.
      *
-     * @param snapshotTypeId   type to identify snapshot within a cluster.
-     * @param logPosition      at which the snapshot was taken.
-     * @param leadershipTermId at which the snapshot was taken.
-     * @param snapshotIndex    so the snapshot can be sectioned.
-     * @param timeUnit         of the cluster timestamps stored in the snapshot.
-     * @param appVersion       associated with the snapshot from {@link ClusteredServiceContainer.Context#appVersion()}.
+     * @param snapshotMarkData data containing snapshot metadata.
      */
-    public void markBegin(
-        final long snapshotTypeId,
-        final long logPosition,
-        final long leadershipTermId,
-        final int snapshotIndex,
-        final TimeUnit timeUnit,
-        final int appVersion)
+    public void markBegin(SnapshotMarkData snapshotMarkData)
     {
-        markSnapshot(
-            snapshotTypeId, logPosition, leadershipTermId, snapshotIndex, SnapshotMark.BEGIN, timeUnit, appVersion);
+        markSnapshot(snapshotMarkData, SnapshotMark.BEGIN);
     }
 
     /**
      * Mark the end of the encoded snapshot.
+    /**
+     * Mark the end of the encoded snapshot.
      *
-     * @param snapshotTypeId   type to identify snapshot within a cluster.
-     * @param logPosition      at which the snapshot was taken.
-     * @param leadershipTermId at which the snapshot was taken.
-     * @param snapshotIndex    so the snapshot can be sectioned.
-     * @param timeUnit         of the cluster timestamps stored in the snapshot.
-     * @param appVersion       associated with the snapshot from {@link ClusteredServiceContainer.Context#appVersion()}.
+     * @param snapshotMarkData data containing snapshot metadata.
      */
-    public void markEnd(
-        final long snapshotTypeId,
-        final long logPosition,
-        final long leadershipTermId,
-        final int snapshotIndex,
-        final TimeUnit timeUnit,
-        final int appVersion)
+    public void markEnd(SnapshotMarkData snapshotMarkData)
     {
-        markSnapshot(
-            snapshotTypeId, logPosition, leadershipTermId, snapshotIndex, SnapshotMark.END, timeUnit, appVersion);
+        markSnapshot(snapshotMarkData, SnapshotMark.END);
     }
 
     /**
      * Generically {@link SnapshotMark} a snapshot.
+    /**
+     * Generically {@link SnapshotMark} a snapshot.
      *
-     * @param snapshotTypeId   type to identify snapshot within a cluster.
-     * @param logPosition      at which the snapshot was taken.
-     * @param leadershipTermId at which the snapshot was taken.
-     * @param snapshotIndex    so the snapshot can be sectioned.
+     * @param snapshotMarkData data containing snapshot metadata.
      * @param snapshotMark     which specifies the type of snapshot mark.
-     * @param timeUnit         of the cluster timestamps stored in the snapshot.
-     * @param appVersion       associated with the snapshot from {@link ClusteredServiceContainer.Context#appVersion()}.
      */
-    public void markSnapshot(
-        final long snapshotTypeId,
-        final long logPosition,
-        final long leadershipTermId,
-        final int snapshotIndex,
-        final SnapshotMark snapshotMark,
-        final TimeUnit timeUnit,
-        final int appVersion)
+    public void markSnapshot(SnapshotMarkData snapshotMarkData, final SnapshotMark snapshotMark)
     {
         idleStrategy.reset();
         while (true)
@@ -146,8 +116,8 @@ public class SnapshotTaker
             {
                 snapshotMarkerEncoder
                     .wrapAndApplyHeader(bufferClaim.buffer(), bufferClaim.offset(), messageHeaderEncoder)
-                    .typeId(snapshotTypeId)
-                    .logPosition(logPosition)
+                    .typeId(snapshotMarkData.getSnapshotTypeId())
+                    .logPosition(snapshotMarkData.getLogPosition())
                     .leadershipTermId(leadershipTermId)
                     .index(snapshotIndex)
                     .mark(snapshotMark)
